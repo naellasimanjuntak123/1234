@@ -1,0 +1,32 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Prevent Directory Listing
+Options -Indexes
+
+# Protect config files
+<FilesMatch "^(database\.php|init_db\.sql)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Enable error reporting (disable in production)
+php_flag display_errors On
+php_value error_reporting E_ALL
+
+# Set upload limits
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+
+# Set session timeout (30 minutes)
+php_value session.gc_maxlifetime 1800
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
