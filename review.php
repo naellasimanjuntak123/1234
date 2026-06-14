@@ -8,8 +8,8 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id    = $_SESSION['user_id'];
-$order_id = (int)($_GET['order_id'] ?? 0);
-$product_id = (int)($_GET['product_id'] ?? 0);
+$order_id   = $_GET['order_id'] ?? 0;
+$product_id = $_GET['product_id'] ?? 0;
 
 // Cek apakah pesanan milik user dan sudah completed
 $stmt = $pdo->prepare("SELECT o.*, p.name as product_name, p.image as product_image 
@@ -36,9 +36,6 @@ $error   = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_reviewed) {
     $rating  = (int)($_POST['rating'] ?? 0);
     $comment = trim($_POST['comment'] ?? '');
-    if (strlen($comment) > 500) {
-    $error = 'Ulasan maksimal 500 karakter.';
-}
 
     if ($rating < 1 || $rating > 5) {
         $error = 'Pilih rating bintang terlebih dahulu.';

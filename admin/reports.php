@@ -10,19 +10,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 $start_date = $_GET['start_date'] ?? date('Y-m-01');
 $end_date   = $_GET['end_date']   ?? date('Y-m-d');
 
-// Validasi tanggal
-if (!strtotime($start_date) || !strtotime($end_date)) {
-    die("Format tanggal tidak valid");
-}
-
-if ($start_date > $end_date) {
-    die("Tanggal mulai tidak boleh melebihi tanggal akhir");
-}
-
-$stmt = $pdo->prepare("
-    SELECT COUNT(*) as total_orders, ...
-");
-
 $stmt = $pdo->prepare("
     SELECT COUNT(*) as total_orders, SUM(total_amount) as total_revenue, AVG(total_amount) as avg_order_value
     FROM orders WHERE status IN ('paid','processing','shipped','completed')
@@ -91,9 +78,9 @@ $daily_sales = $stmt->fetchAll();
             <form method="GET" class="filter-form"
                 style="margin:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                 <label>Dari:</label>
-                <input type="date" name="start_date" value="<?= htmlspecialchars($start_date) ?>">
+                <input type="date" name="start_date" value="<?= $start_date ?>">
                 <label>Sampai:</label>
-                <input type="date" name="end_date" value="<?= htmlspecialchars($end_date) ?>">
+                <input type="date" name="end_date" value="<?= $end_date ?>">
                 <button type="submit" class="btn btn-primary">Filter</button>
             </form>
 
