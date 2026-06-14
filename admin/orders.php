@@ -9,6 +9,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 
 $status_filter = $_GET['status'] ?? '';
 
+$allowed_status = [
+    'pending',
+    'paid',
+    'processing',
+    'shipped',
+    'completed',
+    'cancelled'
+];
+
+if (!in_array($status_filter, $allowed_status)) {
+    $status_filter = '';
+}
+
 $sql = "SELECT o.*, u.name as customer_name FROM orders o JOIN users u ON o.user_id = u.id";
 $params = [];
 
@@ -84,7 +97,7 @@ function statusLabel($status) {
                     <td><?= htmlspecialchars($order['customer_name']) ?></td>
                     <td>Rp <?= number_format($order['total_amount'], 0, ',', '.') ?></td>
                     <td><span
-                            class="status-badge status-<?= $order['status'] ?>"><?= statusLabel($order['status']) ?></span>
+                            class="status-badge status-<?= htmlspecialchars($order['status']) ?>"><?= statusLabel($order['status']) ?></span>
                     </td>
                     <td><?= date('d M Y H:i', strtotime($order['created_at'])) ?></td>
                     <td><a href="order_manage.php?id=<?= $order['id'] ?>" class="btn btn-small">Kelola</a></td>
