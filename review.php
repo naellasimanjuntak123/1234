@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id    = $_SESSION['user_id'];
 $order_id   = $_GET['order_id'] ?? 0;
 $product_id = $_GET['product_id'] ?? 0;
-
+// menambahkan GET 
 // Cek apakah pesanan milik user dan sudah completed
 $stmt = $pdo->prepare("SELECT o.*, p.name as product_name, p.image as product_image 
     FROM orders o 
