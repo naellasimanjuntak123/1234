@@ -2,3 +2,4 @@
 ## Kontributor
 - Dhelwa Efriya
 - Clara Sallyndrra
+- Kezia Tabita Amitakasih
