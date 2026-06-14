@@ -8,17 +8,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 }
 
 // Delete promo
-if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
+if (isset($_POST['delete_id'])) {
+    $id = (int) $_POST['delete_id'];
+
     $stmt = $pdo->prepare("DELETE FROM promos WHERE id = ?");
     $stmt->execute([$id]);
+
     header('Location: promos.php');
     exit();
 }
 
 // Toggle active
 if (isset($_GET['toggle'])) {
-    $id = $_GET['toggle'];
+    $id = (int)$_GET['toggle'];
     $stmt = $pdo->prepare("UPDATE promos SET is_active = NOT is_active WHERE id = ?");
     $stmt->execute([$id]);
     header('Location: promos.php');
@@ -32,6 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $discount_percent = $_POST['discount_percent'];
     $start_date = $_POST['start_date'];
     $end_date = $_POST['end_date'];
+
+    // Validasi
+    if (empty($name)) {
+        die("Nama promo tidak boleh kosong");
+    }
+
+    if ($discount_percent < 1 || $discount_percent > 100) {
+        die("Diskon harus antara 1-100%");
+    }
+
+    if ($start_date > $end_date) {
+        die("Tanggal mulai tidak boleh lebih besar dari tanggal berakhir");
+    }
     
     $stmt = $pdo->prepare("INSERT INTO promos (name, description, discount_percent, start_date, end_date) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([$name, $description, $discount_percent, $start_date, $end_date]);
@@ -107,7 +122,13 @@ $promos = $pdo->query("SELECT * FROM promos ORDER BY created_at DESC")->fetchAll
                     <td><?= $promo['is_active'] ? '<span class="badge-success">Aktif</span>' : '<span class="badge-danger">Nonaktif</span>' ?></td>
                     <td>
                         <a href="?toggle=<?= $promo['id'] ?>" class="btn btn-small"><?= $promo['is_active'] ? 'Nonaktifkan' : 'Aktifkan' ?></a>
-                        <a href="?delete=<?= $promo['id'] ?>" class="btn btn-small btn-danger" onclick="return confirm('Hapus promo ini?')">Hapus</a>
+                        <form method="POST" style="display:inline;">
+    <input type="hidden" name="delete_id" value="<?= $promo['id'] ?>">
+    <button type="submit" class="btn btn-small btn-danger"
+        onclick="return confirm('Hapus promo ini?')">
+        Hapus
+    </button>
+</form>
                     </td>
                 </tr>
                 <?php endforeach; ?>
