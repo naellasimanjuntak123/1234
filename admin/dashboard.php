@@ -11,6 +11,7 @@ $total_orders    = $pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
 $total_products  = $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
 $total_customers = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'customer'")->fetchColumn();
 $total_revenue   = $pdo->query("SELECT SUM(total_amount) FROM orders WHERE status IN ('paid', 'processing', 'shipped', 'completed')")->fetchColumn();
+$total_revenue   = $total_revenue ?? 0;
 
 $recent_orders = $pdo->query("
     SELECT o.*, u.name as customer_name 
@@ -133,7 +134,7 @@ $recent_orders = $pdo->query("
                         <td data-label="Pelanggan"><?= htmlspecialchars($order['customer_name']) ?></td>
                         <td data-label="Total">Rp <?= number_format($order['total_amount'], 0, ',', '.') ?></td>
                         <td data-label="Status">
-                            <span class="status-badge status-<?= $order['status'] ?>">
+                            <span class="status-badge status-<?= htmlspecialchars($order['status']) ?>"
                                 <?= strtoupper($order['status']) ?>
                             </span>
                         </td>
