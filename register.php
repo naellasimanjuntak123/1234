@@ -15,12 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$name || !$email || !$password) {
         $error = 'Nama, email, dan kata sandi harus diisi.';
-    } elseif (strlen($password) < 6) {
-        $error = 'Kata sandi minimal 6 karakter.';
+    } elseif (strlen($password) < 8) {
+        $error = 'Kata sandi minimal 8 karakter.'; #Kebijakan password lebih kuat
     } elseif ($password !== $confirm) {
         $error = 'Konfirmasi kata sandi tidak cocok.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid.';
+    } elseif (!empty($phone) && !preg_match('/^[0-9]{10,15}$/', $phone)) {
+    $error = 'Nomor telepon tidak valid.'; #Validasi nomor telepon
     } else {
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
@@ -119,8 +121,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label for="password">Kata Sandi <span style="color:red">*</span></label>
                     <div class="input-eye">
-                        <input type="password" id="password" name="password" placeholder="Minimal 6 karakter"
-                            minlength="6" required oninput="checkStrength()">
+                        <input type="password" id="password" name="password" placeholder="Minimal 8 karakter"
+                            minlength="8" required oninput="checkStrength()"> #Kebijakan password lebih kuat
                         <button type="button" class="eye-btn" onclick="toggleEye('password','eyeIcon1')">
                             <i class="fas fa-eye" id="eyeIcon1"></i>
                         </button>
@@ -171,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             hint.textContent = "";
             return;
         }
-        if (len < 6) {
+        if (len < 8) { #Kebijakan password lebih kuat
             hint.textContent = "Kata sandi terlalu pendek (" + len + "/6 karakter)";
             hint.style.color = "#ef4444";
         } else {
@@ -201,8 +203,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     function validateForm() {
         const pass = document.getElementById("password").value;
         const confirm = document.getElementById("confirm_password").value;
-        if (pass.length < 6) {
-            alert("Kata sandi minimal 6 karakter!");
+        if (pass.length < 8) {
+            alert("Kata sandi minimal 8 karakter!"); #Kebijakan password lebih kuat
             return false;
         }
         if (pass !== confirm) {

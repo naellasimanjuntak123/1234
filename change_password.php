@@ -20,8 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Semua field harus diisi';
     } elseif ($new_password !== $confirm_password) {
         $error = 'Password baru dan konfirmasi tidak cocok';
-    } elseif (strlen($new_password) < 6) {
-        $error = 'Password baru minimal 6 karakter';
+    } elseif (strlen($new_password) < 8) {
+        $error = 'Password baru minimal 8 karakter'; #Kebijakan password lebih kuat
     } else {
         // Cek password lama
         $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
             $stmt->execute([$hashed_password, $_SESSION['user_id']]);
-            
+            session_regenerate_id(true); #Regenerasi session setelah perubahan password
             $success = 'Password berhasil diubah';
         }
     }
@@ -73,13 +73,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="form-group">
                     <label for="new_password">Password Baru</label>
-                    <input type="password" id="new_password" name="new_password" required minlength="6">
-                    <small style="color: var(--text-light);">Minimal 6 karakter</small>
+                    <input type="password" id="new_password" name="new_password" required minlength="8"> #Kebijakan password lebih kuat
+                    <small style="color: var(--text-light);">Minimal 8 karakter</small>
                 </div>
                 
                 <div class="form-group">
                     <label for="confirm_password">Konfirmasi Password Baru</label>
-                    <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+                    <input type="password" id="confirm_password" name="confirm_password" required minlength="8"> #Kebijakan password lebih kuat
                 </div>
                 
                 <button type="submit" class="btn btn-primary">

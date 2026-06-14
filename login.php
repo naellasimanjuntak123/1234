@@ -5,8 +5,9 @@ require_once 'config/database.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+#Membersihkan spasi tidak perlu pada input
     
     if ($email && $password) {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
@@ -14,9 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
         
         if ($user && password_verify($password, $user['password'])) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['role'];
+        #Mencegah Session Fixation Attack
             
             if ($user['role'] === 'admin') {
                 header('Location: admin/dashboard.php');
@@ -77,3 +80,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </body>
 
 </html>
+
