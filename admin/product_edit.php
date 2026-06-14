@@ -7,7 +7,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     exit();
 }
 
-$id = $_GET['id'] ?? 0;
+$id = (int)($_GET['id'] ?? 0);
+
+if ($id <= 0) {
+    header('Location: products.php');
+    exit();
+}
 $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
 $stmt->execute([$id]);
 $product = $stmt->fetch();
@@ -19,29 +24,58 @@ if (!$product) {
 
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $description = $_POST['description'];
-    $price = $_POST['price'];
-    $stock = $_POST['stock'];
-    $category = $_POST['category'];
-    
-    $image_path = $product['image'];
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $filename = 'product_' . time() . '.' . $ext;
-        $upload_path = '../assets/images/' . $filename;
-        
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-            $image_path = 'assets/images/' . $filename;
-        }
+    $name = trim($_POST['name']);
+$description = trim($_POST['description']);
+$price = $_POST['price'];
+$stock = $_POST['stock'];
+$category = trim($_POST['category']);
+    // 3. Validasi data wajib
+    if (empty($name) || empty($category)) {
+        $message = 'Nama produk dan kategori wajib diisi';
     }
-    
-    $stmt = $pdo->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category = ?, image = ? WHERE id = ?");
-    if ($stmt->execute([$name, $description, $price, $stock, $category, $image_path, $id])) {
-        header('Location: products.php');
-        exit();
-    } else {
-        $message = 'Gagal mengupdate produk';
+
+    // 4. Validasi harga
+    elseif ($price <= 0) {
+        $message = 'Harga harus lebih dari 0';
+    }
+
+    // 5. Validasi stok
+    elseif ($stock < 0) {
+        $message = 'Stok tidak boleh negatif';
+    }
+
+    else {
+    $image_path = $product['image'];
+
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+            $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (!in_array($ext, $allowed)) {
+                $message = 'Format gambar harus JPG, JPEG, PNG atau WEBP';
+            }
+            elseif ($_FILES['image']['size'] > 2097152) {
+                $message = 'Ukuran gambar maksimal 2 MB';
+            }
+            else {
+                $filename = 'product_' . time() . '.' . $ext;
+                $upload_path = '../assets/images/' . $filename;
+
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                    $image_path = 'assets/images/' . $filename;
+                }
+            }
+        }
+
+        $stmt = $pdo->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock = ?, category = ?, image = ? WHERE id = ?");
+
+        if ($stmt->execute([$name, $description, $price, $stock, $category, $image_path, $id])) {
+            header('Location: products.php?success=updated');
+            exit();
+        } else {
+            $message = 'Gagal mengupdate produk';
+        }
     }
 }
 ?>
